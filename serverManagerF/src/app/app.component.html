@@ -1,7 +1,7 @@
 <div class="container-xl">
   <div class="table-responsive">
     <div class="table-wrapper">
-      <div class="table-title">
+      <div class="table-title table-dark">
         <div class="row">
           <div class="col-sm-6">
             <h2>Manage Servers</h2>
@@ -15,7 +15,8 @@
             </a>
 
             <span>
-              <select name="status" class="btn btn-info" style="height: 32.91px;">
+              <select (ngModelChange)="filterServers($event)" ngModel="ALL" name="status" class="btn btn-info"
+                style="height: 32.91px;">
                 <option value="ALL">ALL</option>
                 <option value="SERVER_UP">SERVER UP</option>
                 <option value="SERVER_DOWN">SERVER DOWN</option>
@@ -24,13 +25,13 @@
           </div>
         </div>
       </div> <br>
-      <ng-container>
-        <ng-container>
+      <ng-container *ngIf="(appState$ | async) as appState" [ngSwitch]="appState.dataState">
+        <ng-container *ngSwitchCase="DataState.LOADING_STATE">
           <div class="col-md-12 single-note-item text-center">
             <div class="spinner-border text-info" role="status"></div>
           </div>
         </ng-container>
-        <ng-container>
+        <ng-container *ngSwitchCase="DataState.LOADED_STATE">
           <table class="table table-striped table-hover" id="servers">
             <thead>
               <tr>
@@ -44,32 +45,38 @@
                 <th>Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody *ngFor="let server of appState.appData.data.servers; let i = index;">
               <tr>
-                <td> <img width="40" height="40"></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
+                <td> <img [src]="server.imageUrl" width="40" height="40"></td>
+                <td>{{ server.ipAddress}}</td>
+                <td>{{ server.name }}</td>
+                <td>{{ server.memory }}</td>
+                <td>{{ server.type}}</td>
                 <td>
-                  <span class="badge"></span>
+                  <span class="badge"
+                    [ngClass]="[server.status === Status.SERVER_UP ? ' badge-success' : ' badge-danger']">
+                    {{ server.status === Status.SERVER_UP ? 'SERVER UP' : 'SERVER DOWN'}}
+                  </span>
                 </td>
                 <td>
-                  <a style="cursor: pointer;">
-                    <i class="material-icons" title="Ping server">&#xe328;</i>
-                    <i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
+                  <a (click)="pingServer(server.ipAddress)" style="cursor: pointer;">
+                    <i *ngIf="(filterStatus$ |async) === '' || (filterStatus$ |async) !== server.ipAddress"
+                      class="material-icons" title="Ping server">&#xe328;</i>
+                    <i *ngIf="(filterStatus$ |async) === server.ipAddress" class="fa fa-spinner fa-spin"
+                      style="font-size:24px"></i>
                   </a>
                 </td>
                 <td>
                   <a class="delete" data-toggle="modal" style="cursor: pointer;"><i class="material-icons"
                       data-toggle="tooltip" title="Delete">&#xE872;</i></a>
                 </td>
+              </tr>
             </tbody>
           </table>
         </ng-container>
-        <ng-container>
+        <ng-container *ngSwitchCase="DataState.ERROR_STATE">
           <div class="alert-danger">
-
+            {{ appState.error }}
           </div>
         </ng-container>
       </ng-container>
