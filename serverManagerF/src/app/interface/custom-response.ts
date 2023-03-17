@@ -1,4 +1,4 @@
-import { Server } from 'http';
+import { Server } from '../interface/server';
 
 export interface CustomResponse {
   timeStamp: Date;

@@ -1,15 +1,16 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Server } from '../interface/server';
-import { catchError, Observable, tap, throwError } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 import { Status } from '../enum/status.enum';
 import { CustomResponse } from '../interface/custom-response';
+import { Server } from '../interface/server';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ServerService {
-  private readonly apiUrl = 'any';
+  private readonly apiUrl = 'http://localhost:8080/api/v1';
 
   constructor(private http: HttpClient) {}
 
@@ -46,7 +47,7 @@ export class ServerService {
               ...response,
               message:
                 response.data.servers.filter(
-                  (server) => server.status === status
+                  (server: Server) => server.status === status
                 ).length > 0
                   ? `Servers filterd by ${
                       status === Status.SERVER_UP ? 'SERVER UP' : 'SERVER DOWN'
@@ -54,7 +55,7 @@ export class ServerService {
                   : `No server of ${status} found`,
               data: {
                 servers: response.data.servers.filter(
-                  (server) => server.status === status
+                  (server: Server) => server.status === status
                 ),
               },
             }
